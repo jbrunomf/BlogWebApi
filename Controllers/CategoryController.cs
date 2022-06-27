@@ -106,6 +106,10 @@ namespace BlogWebApi.Controllers
 
                 return Ok();
             }
+            catch (DbUpdateException e)
+            {
+                return StatusCode(500, "Não foi possível alterar a categoria.");
+            }
             catch (Exception e)
             {
                 return StatusCode(500, "Erro ao deletar categoria.");
