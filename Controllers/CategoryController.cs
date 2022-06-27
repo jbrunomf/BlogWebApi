@@ -1,17 +1,27 @@
 ﻿using Blog.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogWebApi.Controllers
 {
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        [HttpGet("categories")]
-        public IActionResult Get(
+        [HttpGet("v1/categories")]
+        public async Task<IActionResult> GetAsync(
             [FromServices] BlogDataContext context)
         {
-            var categories = context.Categories.ToList();
+            var categories = await context.Categories.ToListAsync();
             return Ok(categories);
+        }
+
+        [HttpGet("v1/categories/{id:int}")]
+        public async Task<IActionResult> Get(
+            [FromRoute] int id,
+            [FromServices] BlogDataContext context)
+        {
+            var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            return Ok(category);
         }
     }
 }
