@@ -1,4 +1,4 @@
-﻿using Blog.Data;
+﻿using BlogWebApi.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +21,11 @@ namespace BlogWebApi.Controllers
             [FromServices] BlogDataContext context)
         {
             var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
             return Ok(category);
         }
     }

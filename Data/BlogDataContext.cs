@@ -2,7 +2,7 @@
 using BlogWebApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Blog.Data
+namespace BlogWebApi.Data
 {
     public class BlogDataContext : DbContext
     {
