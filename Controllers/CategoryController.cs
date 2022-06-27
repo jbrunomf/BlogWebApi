@@ -35,10 +35,21 @@ namespace BlogWebApi.Controllers
             [FromBody] Category model,
             [FromServices] BlogDataContext context)
         {
-            await context.Categories.AddAsync(model);
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.Categories.AddAsync(model);
+                await context.SaveChangesAsync();
 
-            return Created($"v1/categories/{model.Id}", model);
+                return Created($"v1/categories/{model.Id}", model);
+            }
+            catch (DbUpdateException e)
+            {
+                return StatusCode(500, "Não foi possível incluir a categoria.");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Falha interna no servidor.");
+            }
         }
 
         [HttpPut("v1/categories/{id:int}")]
@@ -47,21 +58,32 @@ namespace BlogWebApi.Controllers
             [FromBody] Category model,
             [FromServices] BlogDataContext context)
         {
-            var category = context.Categories.SingleOrDefault(x => x.Id == id);
-
-            if (category is null)
+            try
             {
-                return NotFound();
+                var category = context.Categories.SingleOrDefault(x => x.Id == id);
+
+                if (category is null)
+                {
+                    return NotFound();
+                }
+
+                category.Name = model.Name;
+                category.Posts = model.Posts;
+                category.Slug = model.Slug;
+
+                context.Categories.Update(category);
+                await context.SaveChangesAsync();
+
+                return Ok(category);
             }
-
-            category.Name = model.Name;
-            category.Posts = model.Posts;
-            category.Slug = model.Slug;
-
-            context.Categories.Update(category);
-            await context.SaveChangesAsync();
-
-            return Ok(category);
+            catch (DbUpdateException e)
+            {
+                return StatusCode(500, "Não foi possível alterar a categoria.");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Falha interna no servidor.");
+            }
         }
 
 
@@ -70,17 +92,24 @@ namespace BlogWebApi.Controllers
             [FromRoute] int id,
             [FromServices] BlogDataContext context)
         {
-            var category = await context.Categories.SingleOrDefaultAsync(x => x.Id == id);
-
-            if (category is null)
+            try
             {
-                return NotFound();
+                var category = await context.Categories.SingleOrDefaultAsync(x => x.Id == id);
+
+                if (category is null)
+                {
+                    return NotFound();
+                }
+
+                context.Categories.Remove(category);
+                await context.SaveChangesAsync();
+
+                return Ok();
             }
-
-            context.Categories.Remove(category);
-            await context.SaveChangesAsync();
-
-            return Ok();
+            catch (Exception e)
+            {
+                return StatusCode(500, "Erro ao deletar categoria.");
+            }
         }
     }
 }
