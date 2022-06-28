@@ -13,22 +13,37 @@ namespace BlogWebApi.Controllers
         public async Task<IActionResult> GetAsync(
             [FromServices] BlogDataContext context)
         {
-            var categories = await context.Categories.ToListAsync();
-            return Ok(categories);
+            try
+            {
+                var categories = await context.Categories.ToListAsync();
+
+                return Ok(new ResultViewModel<List<Category>>(categories));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ResultViewModel<List<Category>>("Falha interna no Servidor."));
+            }
         }
 
         [HttpGet("v1/categories/{id:int}")]
-        public async Task<IActionResult> Get(
+        public async Task<IActionResult> GetById(
             [FromRoute] int id,
             [FromServices] BlogDataContext context)
         {
-            var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
-            if (category == null)
+            try
             {
-                return NotFound();
-            }
+                var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+                if (category == null)
+                {
+                    return NotFound(new ResultViewModel<string>("Erro ao localizar categoria"));
+                }
 
-            return Ok(category);
+                return Ok(new ResultViewModel<Category>(category));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ResultViewModel<string>(e.ToString()));
+            }
         }
 
         [HttpPost("v1/categories")]
@@ -38,6 +53,7 @@ namespace BlogWebApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) return StatusCode(500, new ResultViewModel<string>("Erro interno do servidor."));
                 var category = new Category
                 {
                     Id = 0,
@@ -45,18 +61,20 @@ namespace BlogWebApi.Controllers
                     Slug = model.Slug
                 };
 
+
                 await context.Categories.AddAsync(category);
                 await context.SaveChangesAsync();
 
                 return Created($"v1/categories/{category.Id}", category);
+
             }
             catch (DbUpdateException e)
             {
-                return StatusCode(500, "Não foi possível incluir a categoria.");
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível incluir a categoria."));
             }
             catch (Exception e)
             {
-                return StatusCode(500, "Falha interna no servidor.");
+                return StatusCode(500, new ResultViewModel<string>("Falha interna no servidor."));
             }
         }
 
@@ -85,11 +103,11 @@ namespace BlogWebApi.Controllers
             }
             catch (DbUpdateException e)
             {
-                return StatusCode(500, "Não foi possível alterar a categoria.");
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível alterar a categoria."));
             }
             catch (Exception e)
             {
-                return StatusCode(500, "Falha interna no servidor.");
+                return StatusCode(500, new ResultViewModel<string>("Falha interna no servidor."));
             }
         }
 
@@ -105,7 +123,7 @@ namespace BlogWebApi.Controllers
 
                 if (category is null)
                 {
-                    return NotFound();
+                    return NotFound(new ResultViewModel<string>("Erro ao remover categoria."));
                 }
 
                 context.Categories.Remove(category);
@@ -115,11 +133,11 @@ namespace BlogWebApi.Controllers
             }
             catch (DbUpdateException e)
             {
-                return StatusCode(500, "Não foi possível alterar a categoria.");
+                return StatusCode(500, new ResultViewModel<string>("Não foi possível alterar a categoria."));
             }
             catch (Exception e)
             {
-                return StatusCode(500, "Erro ao deletar categoria.");
+                return StatusCode(500, new ResultViewModel<string>("Erro ao deletar categoria."));
             }
         }
     }
