@@ -42,7 +42,7 @@ namespace BlogWebApi.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, new ResultViewModel<string>(e.ToString()));
+                return StatusCode(500, new ResultViewModel<string>("Falha interna no servidor."));
             }
         }
 
