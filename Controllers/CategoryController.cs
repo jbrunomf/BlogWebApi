@@ -1,4 +1,5 @@
 ﻿using BlogWebApi.Data;
+using BlogWebApi.Extensions;
 using BlogWebApi.Models;
 using BlogWebApi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,8 @@ namespace BlogWebApi.Controllers
         {
             try
             {
-                if (!ModelState.IsValid) return StatusCode(500, new ResultViewModel<string>("Erro interno do servidor."));
+                if (!ModelState.IsValid) return BadRequest(new ResultViewModel<Category>(ModelState.GetErrors()));
+
                 var category = new Category
                 {
                     Id = 0,
