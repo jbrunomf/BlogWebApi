@@ -63,7 +63,7 @@ namespace BlogWebApi.Controllers
         [HttpPut("v1/categories/{id:int}")]
         public async Task<IActionResult> Put(
             [FromRoute] int id,
-            [FromBody] Category model,
+            [FromBody] EditCategoryViewModel model,
             [FromServices] BlogDataContext context)
         {
             try
@@ -76,7 +76,6 @@ namespace BlogWebApi.Controllers
                 }
 
                 category.Name = model.Name;
-                category.Posts = model.Posts;
                 category.Slug = model.Slug;
 
                 context.Categories.Update(category);
