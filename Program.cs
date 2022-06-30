@@ -1,8 +1,29 @@
+using System.Text;
+using BlogWebApi;
 using BlogWebApi.Data;
+using BlogWebApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+var key = Encoding.ASCII.GetBytes(Configuration.JwtKey);
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(option =>
@@ -11,6 +32,8 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddDbContext<BlogDataContext>(); // Adicionando o  DbContext como um service
+builder.Services.AddTransient<TokenService>(); // Adicionando o TokenService como Servico
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +50,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
