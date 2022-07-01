@@ -16,7 +16,10 @@ namespace BlogWebApi.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim("teste", "value")
+                    new Claim(ClaimTypes.Name, "jbrunomf"),
+                    new Claim(ClaimTypes.Role, "user"),
+                    new Claim(ClaimTypes.Role, "admin"),
+                    new Claim("email", "admin@teste.com"),
                 }),
                 Expires = DateTime.UtcNow.AddHours(8),
                 SigningCredentials = new SigningCredentials( 
